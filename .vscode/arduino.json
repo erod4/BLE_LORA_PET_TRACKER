@@ -1,0 +1,4 @@
+{
+    "board": "arduino:avr:uno",
+    "sketch": "arduino/BLE_LORA_SLAVE/BLE_LORA_SLAVE.ino"
+}
