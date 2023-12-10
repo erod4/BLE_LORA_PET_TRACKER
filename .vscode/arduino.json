@@ -1,4 +1,5 @@
 {
     "board": "arduino:avr:uno",
-    "sketch": "arduino/BLE_LORA_SLAVE/BLE_LORA_SLAVE.ino"
+    "sketch": "arduino/BLE_LORA_SLAVE/BLE_LORA_SLAVE.ino",
+    "port": "/dev/tty.usbmodem1401"
 }

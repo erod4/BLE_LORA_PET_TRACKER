@@ -15,7 +15,7 @@ const Home = () => {
     <View style={styles.container}>
       <SettingsIcon />
 
-      {!(isSearching || !isConnected) ? <Searching /> : <Map />}
+      {isSearching || !isConnected ? <Searching /> : <Map />}
       <BottomPanel />
     </View>
   );

@@ -42,7 +42,7 @@ const BottomPanel = () => {
       }}
       handleIndicatorStyle={{ backgroundColor: "#777" }}
     >
-      {!isConnected ? (
+      {isConnected ? (
         <ConnectedPanel name={"Luna"} isContentsShown={isContentsShown} />
       ) : (
         <DisconnectedPanel />
