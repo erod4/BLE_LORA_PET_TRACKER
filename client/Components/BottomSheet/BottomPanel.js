@@ -13,7 +13,7 @@ import { BLEContext } from "../BluetoothComonents/BLEContextProvider";
 import DisconnectedPanel from "./Disconnected/DisconnectedPanel";
 const BottomPanel = () => {
   const [isContentsShown, setIsContentsShown] = useState(false);
-  const { isConnected } = useContext(BLEContext);
+  const { connectionStatus } = useContext(BLEContext);
   // ref
   const bottomSheetRef = useRef(null);
 
@@ -42,7 +42,7 @@ const BottomPanel = () => {
       }}
       handleIndicatorStyle={{ backgroundColor: "#777" }}
     >
-      {isConnected ? (
+      {connectionStatus === "Connected" ? (
         <ConnectedPanel name={"Luna"} isContentsShown={isContentsShown} />
       ) : (
         <DisconnectedPanel />

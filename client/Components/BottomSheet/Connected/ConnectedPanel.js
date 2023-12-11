@@ -12,7 +12,7 @@ import {
 import { BLEContext } from "../../BluetoothComonents/BLEContextProvider";
 import { SettingContext } from "./SettingContext";
 const ConnectedPanel = ({ name, isContentsShown }) => {
-  const { connectedDevice, sendData } = useContext(BLEContext);
+  const { sendData } = useContext(BLEContext);
   const {
     toggleLight,
     playSound,
@@ -22,12 +22,12 @@ const ConnectedPanel = ({ name, isContentsShown }) => {
     playingSound,
   } = useContext(SettingContext);
 
-  useEffect(() => {
-    sendData(`Light: ${isLightOn} `);
-  }, [isLightOn]);
-  useEffect(() => {
-    sendData(`Sound: ${playingSound} `);
-  }, [playingSound]);
+  // useEffect(() => {
+  //   sendData(`Light: ${isLightOn} `);
+  // }, [isLightOn]);
+  // useEffect(() => {
+  //   sendData(`Sound: ${playingSound} `);
+  // }, [playingSound]);
   return (
     <View style={styles.header}>
       <View style={styles.nameContainer}>

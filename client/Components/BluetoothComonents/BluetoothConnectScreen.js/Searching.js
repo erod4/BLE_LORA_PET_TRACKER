@@ -7,7 +7,7 @@ import { faBluetoothB } from "@fortawesome/free-brands-svg-icons";
 import { BLEContext } from "../BLEContextProvider";
 
 const Searching = () => {
-  const { scanDevices, isSearching, scannedDevices } = useContext(BLEContext);
+  const { connectionStatus } = useContext(BLEContext);
 
   const animationRef = useRef(null);
   useEffect(() => {
@@ -26,27 +26,19 @@ const Searching = () => {
         paddingTop: 120,
       }}
     >
-      {scannedDevices?.length > 0 ? (
-        <></>
-      ) : (
-        <TouchableOpacity
-          disabled={isSearching && true}
-          onPress={() => {
-            scanDevices();
-          }}
-          style={{
-            backgroundColor: "#0466c8",
-            paddingHorizontal: 105,
-            paddingVertical: 15,
-            borderRadius: 30,
-            marginBottom: 40,
-          }}
-        >
-          <Text style={{ fontWeight: "700", color: "#fff", fontSize: 20 }}>
-            {isSearching ? "Scanning.." : "Begin Scannning"}
-          </Text>
-        </TouchableOpacity>
-      )}
+      <View
+        style={{
+          backgroundColor: "#0466c8",
+          paddingHorizontal: 80,
+          paddingVertical: 15,
+          borderRadius: 10,
+          marginBottom: 40,
+        }}
+      >
+        <Text style={{ fontWeight: "700", color: "#fff", fontSize: 15 }}>
+          {connectionStatus}
+        </Text>
+      </View>
       <LottieView
         style={{
           height: 400,

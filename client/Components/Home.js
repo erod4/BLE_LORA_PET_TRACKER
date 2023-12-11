@@ -10,12 +10,12 @@ import SettingsIcon from "./Settings/SettingsIcon";
 import ReCenter from "./MapComponents/ReCenter";
 
 const Home = () => {
-  const { isSearching, isConnected } = useContext(BLEContext);
+  const { connectionStatus } = useContext(BLEContext);
   return (
     <View style={styles.container}>
       <SettingsIcon />
 
-      {isSearching || !isConnected ? <Searching /> : <Map />}
+      {connectionStatus === "Connected" ? <Map /> : <Searching />}
       <BottomPanel />
     </View>
   );

@@ -15,6 +15,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Login from "./Components/Login/Login";
 import SettingsPage from "./Components/Settings/SettingsPage";
+import RegisterScreen from "./Components/Register/RegisterScreen";
 
 export default function App() {
   const Stack = createNativeStackNavigator();
@@ -24,7 +25,7 @@ export default function App() {
       <BLEContextProvider>
         <SettingContextProvider>
           <NavigationContainer>
-            <Stack.Navigator initialRouteName="home">
+            <Stack.Navigator initialRouteName="login">
               <Stack.Screen
                 name="login"
                 component={Login}
@@ -36,9 +37,20 @@ export default function App() {
                 options={{ headerShown: false }}
               />
               <Stack.Screen
+                name="register"
+                component={RegisterScreen}
+                options={{ headerShown: false }}
+              />
+              <Stack.Screen
                 name="settings"
                 component={SettingsPage}
-                options={{ headerShown: true }}
+                options={{
+                  title: "Settings",
+                  headerShown: true,
+                  headerStyle: { backgroundColor: "rgba(25, 25, 25, 1)" },
+                  headerTitleStyle: { color: "#fff" },
+                  headerTintColor: "#fff",
+                }}
               />
             </Stack.Navigator>
           </NavigationContainer>

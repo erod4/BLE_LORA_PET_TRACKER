@@ -4,94 +4,53 @@
 #define BAUD 9600
 ///rx=10 tx=11
 
-
+String lora_RX_address = "1";   //enter Lora RX address
+ char c;
 String incomingString;
-String coords;
 //lora software serial instance 
 SoftwareSerial LORA(2,3);
-SoftwareSerial sGPS(10,11);
-Adafruit_GPS GPS(&sGPS);
-String gps_coords="";
-String lora_RX_address = "1";   //enter Lora RX address
+SoftwareSerial GPS(10,11);
+Adafruit_GPS AGPS(&GPS);
+float lat;
+float lon;
 
-char c;
 void setup()
 {
     //Baud set to 9600
     Serial.begin(BAUD);
     LORA.begin(BAUD);
-    LORA.println("HI");
-    GPS.begin(BAUD);
-    GPS.sendCommand("PTMK_SET_NMEA_OUTPUT_RMCGGA");
-        GPS.sendCommand("PTMK_SET_NMEA_UPDATE_1HZ");
+    AGPS.begin(BAUD);
+    AGPS.sendCommand("MPTK_SET_NMEA_OUTPUT_RMCGGA");
+    AGPS.sendCommand("MPTK_SET_NMEA_UPDATE_1HZ");
+    
 delay(1000);
     LORA.setTimeout(500);
     
 }
 
-;void loop()
+void loop()
 {
-  clearGPS();
+  // clearGps();
+ if(AGPS.available()){
+    readGPSData();
 
-  while (!GPS.newNMEAreceived()) {
-    c = GPS.read();
-  }
+ }
 
-  GPS.parse(GPS.lastNMEA());
+  readLoraData();
+ delay(1000);
+ 
+   
+}
+void readLoraData(){
+   LORA.listen();
+   if(LORA.isListening()){
 
-  // Serial.print("Time: ");
-  // Serial.print(GPS.hour, DEC);
-  // Serial.print(':');
-  // Serial.print(GPS.minute, DEC);
-  // Serial.print(':');
-  // Serial.print(GPS.seconds, DEC);
-  // Serial.print('.');
-  // Serial.println(GPS.milliseconds);
 
-  // Serial.print("Date: ");
-  // Serial.print(GPS.day, DEC);
-  // Serial.print('/');
-  // Serial.print(GPS.month, DEC);
-  // Serial.print("/20");
-  // Serial.println(GPS.year, DEC);
-
-  // Serial.print("Fix: ");
-  // Serial.print(GPS.fix);
-  // Serial.print(" quality: ");
-  // Serial.println(GPS.fixquality);
-  // Serial.print("Satellites: ");
-  // Serial.println(GPS.satellites);
-
-  if (GPS.fix) {
-    // Serial.print("Location: ");
-    // Serial.print(GPS.latitude, 4);
-    // Serial.print(GPS.lat);
-    // Serial.print(", ");
-    // Serial.print(GPS.longitude, 4);
-    // Serial.println(GPS.lon);
-    // Serial.print("Google Maps location: ");
-    Serial.print(GPS.latitudeDegrees, 4);
-    gps_coords="Lat: "+String(GPS.latitudeDegrees,4);
-
-    // Serial.print(", ");
-    // Serial.println(GPS.longitudeDegrees, 4);
-    gps_coords=", Long: "+String(GPS.longitudeDegrees,4);
-
-    sendLoraData(gps_coords);
-    // Serial.print("Speed (knots): ");
-    // Serial.println(GPS.speed);
-    // Serial.print("Heading: ");
-    // Serial.println(GPS.angle);
-    // Serial.print("Altitude: ");
-    // Serial.println(GPS.altitude);
-  }
-  // Serial.println("-------------------------------------");
-  
-    if(LORA.available())
-    {
         //read incoming string from slave module
         incomingString=LORA.readString();
         //print incoming string to serial monitor
+              Serial.print("here: ");
+
         Serial.println(incomingString);
         
         //splitting data from message format
@@ -119,23 +78,82 @@ delay(1000);
             //react native app automatically dispatches sound false after 5 seconds 
         }
 
-    }
+    GPS.listen();
+   }
 }
 
+void readGPSData(){
+  clearGPS();
+  String sentence="";
+  // GPS.listen();
 
-void clearGPS() {
-  while (!GPS.newNMEAreceived()) {
-    c = GPS.read();
-  }
-  GPS.parse(GPS.lastNMEA());
 
-  while (!GPS.newNMEAreceived()) {
-    c = GPS.read();
+                 Serial.print("heee: ");
+
+      while(!AGPS.newNMEAreceived()){
+        c=AGPS.read();
+      }
+      AGPS.parse(AGPS.lastNMEA());
+      Serial.print("Fix: ");
+  Serial.print(AGPS.fix);
+  Serial.print(" quality: ");
+  Serial.println(AGPS.fixquality);
+  Serial.print("Satellites: ");
+  Serial.println(AGPS.satellites);
+    if (AGPS.fix) {
+    Serial.print("Location: ");
+    Serial.print(AGPS.latitude, 4);
+    Serial.print(AGPS.lat);
+    Serial.print(", ");
+    Serial.print(AGPS.longitude, 6);
+    Serial.println(AGPS.lon);
+    Serial.print("Google Maps location: ");
+    Serial.print(AGPS.latitudeDegrees, 6);
+    Serial.print(", ");
+    Serial.println(AGPS.longitudeDegrees, 6);
+  sentence=String(AGPS.latitudeDegrees,6)+" "+String(AGPS.longitudeDegrees,6);
+   
   }
-  GPS.parse(GPS.lastNMEA());
+      sendLoraData(sentence);
+        // char c = AGPS.read();
+
+        // Check for the start of a GPS sentence
+       
+            // String sentence = "";
+
+            // // Read the entire sentence
+            // while (GPS.available())
+            // {
+            //     c = GPS.read();
+            //     sentence += c;
+            // }
+            // Serial.print("sentence: ");
+
+            // Serial.println(sentence);
+            //               sendLoraData(sentence);
+
+            // Process the GPS sentence
+            // processGPSSentence(sentence);
+      
+    
+
+
 }
 void sendLoraData(const String& data){
-  
+  Serial.println("Sentence test: ");
+  Serial.println(data);
     LORA.println("AT+SEND=" + lora_RX_address+","+data.length()+"," + data); 
 
+}
+
+void clearGPS() {
+  while (!AGPS.newNMEAreceived()) {
+    c = AGPS.read();
+  }
+  AGPS.parse(AGPS.lastNMEA());
+
+  while (!AGPS.newNMEAreceived()) {
+    c = AGPS.read();
+  }
+  AGPS.parse(AGPS.lastNMEA());
 }

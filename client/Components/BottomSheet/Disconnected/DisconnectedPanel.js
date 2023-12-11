@@ -5,6 +5,7 @@ import { BLEContext } from "../../BluetoothComonents/BLEContextProvider";
 
 const DisconnectedPanel = () => {
   const { isSearching, scannedDevices } = useContext(BLEContext);
+
   return (
     <ScrollView style={styles.container}>
       <Text style={styles.title}>

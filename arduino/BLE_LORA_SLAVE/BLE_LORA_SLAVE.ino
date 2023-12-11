@@ -1,107 +1,72 @@
 #include <SoftwareSerial.h>
-
 #define MAX_DATA_LENGTH 50
 
-SoftwareSerial Lora(2, 3);
+//BLE
 SoftwareSerial HM10(4,5);
-
-String incomingString;
-String lora_RX_address = "1";   //enter Lora RX address
+String inData="";
+String writeData="";
 char appData[MAX_DATA_LENGTH];
+//LoRa
+SoftwareSerial Lora(2,3);
+String lora_RX_address="1";
+String incomingString ="";
+/////////////////////////////
 
-String inData = "";
-void setup()
-{
-  Serial.begin(9600);
-  Lora.begin(9600);
-  HM10.begin(9600);
-    // HM10.print("AT");
 
-  HM10.print("Connection Established");
-  
+
+
+
+void setup() {
+HM10.begin(9600);
+Serial.begin(9600);
+Lora.begin(9600);
+
+
+
 }
 
-void loop()
-{
+void loop() {
+  writeBleData(writeData);
   readLoraData();
-  readBluetoothData();
-  sendLoraData(inData);
-  delay(1000);
-
-if(inData=="Light: true"){
-clearLoraData();
-}
-if(inData=="Light: false"){
-clearLoraData();
-}
-if(inData=="Sound: true"){
-clearLoraData();
-}
-if(inData=="Sound: false"){
-clearLoraData();
-}
 }
 
-void readBluetoothData(){
-  HM10.listen();
-  if(HM10.available())
-  {
-     HM10.readBytesUntil('\n', appData, MAX_DATA_LENGTH - 1);  // Read bytes into the char array
-    appData[MAX_DATA_LENGTH - 1] = '\0';  // Null-terminate the char array
-    delay(10);
-    inData= appData;  // save the data in string format
-    Serial.write(appData);
+void readLoraData(){
+  //lora is listening
+  incomingString=Lora.readString();
+
+  Serial.println(incomingString);
+ String coords = extractValues(incomingString);
+  
+ writeData=coords;
+}
+
+void readBleData()
+{
+  HM10.readBytesUntil("\n", appData, MAX_DATA_LENGTH-1);
+  appData[MAX_DATA_LENGTH-1]="\0";
+  delay(10);
+  inData=appData;
+  Serial.write(appData);
+
+}
+void writeBleData(const String& data){
+  HM10.print(data);
+  writeData="";
+}
+
+String extractValues(String input) {
+  // Find the position of the first and last comma
+  int firstCommaPos = input.indexOf(',');
+  int lastCommaPos = input.lastIndexOf(',');
+
+  // Check if both commas are found
+  if (firstCommaPos != -1 && lastCommaPos != -1) {
+    // Extract the substring between the first and last comma
+    String result = input.substring(firstCommaPos + 1, lastCommaPos);
     
+    return result;
+  } else {
+    // Handle the case when either the first or last comma is not found
+    return "0 0";
   }
 }
-void sendLoraData(const String& data){
-    Lora.println("AT+SEND=" + lora_RX_address+","+data.length()+"," + data); 
-
-}
-void clearLoraData(){
-  inData="";
-}
-void writeBluetoothData(const String& data){
-
-HM10.println("data"+data);
-}
-
-void readLoraData()
-{
-   if(Lora.available())
-    {
-        //read incoming string from slave module
-        incomingString=Lora.readString();
-        //print incoming string to serial monitor
-        Serial.println(incomingString);
-        
-        //splitting data from message format
-        char dataArray[30];
-        incomingString.toCharArray(dataArray,30);
-        char* data=strtok(dataArray,",");
-        data=strtok(NULL,",");
-        data=strtok(NULL,",");
-        Serial.println(data);
-        //actual condition is in data
-
-        //compare the condition
-        //strcmp returns 0 if true
-        if(strcmp(data,"Light: true")==0)
-        {
-            //turn light on
-        }
-         if(strcmp(data,"Light: false")==0)
-        {
-            //turn light off
-        }
-         if(strcmp(data,"Sound: true")==0)
-        {
-            //sound recall
-            //react native app automatically dispatches sound false after 5 seconds 
-        }
-
-    }
-}
-
-
-

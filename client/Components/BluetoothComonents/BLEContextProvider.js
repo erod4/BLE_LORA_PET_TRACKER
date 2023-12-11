@@ -4,109 +4,137 @@ import React, {
   useMemo,
   useCallback,
   useEffect,
+  useRef,
 } from "react";
 import { BleManager, Device, Subscription } from "react-native-ble-plx";
-import { err } from "react-native-svg";
-import base64 from "react-native-base64";
 export const BLEContext = createContext(null);
+import { btoa, atob } from "react-native-quick-base64";
 
-const BLTManager = new BleManager();
+const bleManager = new BleManager();
 
 export const BLEContextProvider = ({ children }) => {
-  const [scannedDevices, setScannedDevices] = useState(null);
-  const [connectedDevice, setConnectedDevice] = useState(null);
-  const [isConnected, setIsConnected] = useState(false);
-  const [isSearching, setIsSearching] = useState(false);
-  const [message, setMessage] = useState("Nothing Yet");
+  const [deviceID, setDeviceID] = useState(null);
+  const [stepCount, setStepCount] = useState(0);
+  const [stepDataChar, setStepDataChar] = useState(null); // Not Used
+  const [connectionStatus, setConnectionStatus] = useState("Searching...");
+  const [lat, setLat] = useState(0.0);
+  const [long, setLong] = useState(0.0);
   const SERVICE_UUID = "0000ffe0-0000-1000-8000-00805f9b34fb";
-  const MESSAGE_UUID = "0000ffe1-0000-1000-8000-00805f9b34fb";
+  const STEP_DATA_CHAR_UUID = "0000ffe1-0000-1000-8000-00805f9b34fb";
+  const [firstLine, setFirstLine] = useState(true);
+  let scnd = false;
+  let firstPartOfLong = "";
+  let secondLine = "";
+  const progress = (stepCount / 1000) * 100;
 
-  async function scanDevices() {
-    setIsSearching(true);
-    console.log("scanning");
-    BLTManager.startDeviceScan(null, null, (error, scannedDevice) => {
+  const deviceRef = useRef(null);
+
+  const searchAndConnectToDevice = () => {
+    bleManager.startDeviceScan(null, null, (error, device) => {
       if (error) {
-        console.warn(error);
+        console.error(error);
+        setConnectionStatus("Error searching for devices");
+        return;
       }
-
-      if (scannedDevice && scannedDevice.name == "DSD TECH") {
-        setScannedDevices(scannedDevice);
-        setIsSearching(false);
-
-        BLTManager.stopDeviceScan();
-        // connectDevice(scannedDevice);
+      if (device.name === "DSD TECH") {
+        bleManager.stopDeviceScan();
+        setConnectionStatus("Connecting...");
+        connectToDevice(device);
       }
     });
+  };
 
-    // stop scanning devices after 5 seconds
-    setTimeout(() => {
-      BLTManager.stopDeviceScan();
-    }, 5000);
-  }
-  async function connectDevice(device) {
-    console.log("connecting to Device:", device.name);
+  useEffect(() => {
+    searchAndConnectToDevice();
+  }, []);
 
-    device
+  const connectToDevice = (device) => {
+    return device
       .connect()
       .then((device) => {
-        setConnectedDevice(device);
-        setIsConnected(true);
+        setDeviceID(device.id);
+        setConnectionStatus("Connected");
+        deviceRef.current = device;
         return device.discoverAllServicesAndCharacteristics();
       })
       .then((device) => {
-        //  Set what to do when DC is detected
-        BLTManager.onDeviceDisconnected(device.id, (error, device) => {
-          console.log("Device DC");
-          setIsConnected(false);
-        });
-
-        //Read inital values
-        //Message
-        device
-          .readCharacteristicForService(SERVICE_UUID, MESSAGE_UUID)
-          .then((valenc) => {
-            setMessage(base64.decode(valenc?.value));
-          });
-
-        //BoxValue
-
-        //monitor values and tell what to do when receiving an update
-        //Message
-        device.monitorCharacteristicForService(
-          SERVICE_UUID,
-          MESSAGE_UUID,
-          (error, characteristic) => {
-            if (characteristic?.value != null) {
-              setMessage(base64.decode(characteristic?.value));
-              console.log(
-                "Message update received: ",
-                base64.decode(characteristic?.value)
-              );
-            }
-          },
-          "messagetransaction"
+        return device.services();
+      })
+      .then((services) => {
+        let service = services.find((service) => service.uuid === SERVICE_UUID);
+        return service.characteristics();
+      })
+      .then((characteristics) => {
+        let stepDataCharacteristic = characteristics.find(
+          (char) => char.uuid === STEP_DATA_CHAR_UUID
         );
+        setStepDataChar(stepDataCharacteristic);
+        stepDataCharacteristic.monitor((error, char) => {
+          if (error) {
+            console.error(error);
+            return;
+          }
+          const rawStepData = atob(char.value);
 
-        console.log("Connection established");
+          // console.log(rawStepData != "0 0");
+
+          if (scnd && firstPartOfLong + rawStepData.split(",")[0] != long) {
+            // console.log("long: ", firstPartOfLong + rawStepData.split(",")[0]);
+            // console.log("long", firstPartOfLong + rawStepData);
+            setFirstLine(true);
+            setLong(firstPartOfLong + rawStepData.split(",")[0]);
+            scnd = false;
+            firstPartOfLong = "";
+          }
+          if (rawStepData.length >= 20) {
+            if (firstLine) {
+              const latitude = rawStepData.split(" ")[0].split(",")[1];
+              firstPartOfLong = rawStepData.split(" ")[1];
+              // console.log("first part of second: ", firstPartOfLong);
+              if (latitude != lat) {
+                setLat(latitude);
+              }
+              setFirstLine(false);
+              scnd = true;
+            }
+          }
+        });
+      })
+      .catch((error) => {
+        console.log(error);
+        setConnectionStatus("Error in Connection");
       });
-  }
-  async function sendData(data) {
-    BLTManager.writeCharacteristicWithoutResponseForDevice(
-      connectedDevice?.id,
-      SERVICE_UUID,
-      MESSAGE_UUID,
-      base64.encode(data)
+  };
+
+  useEffect(() => {
+    const subscription = bleManager.onDeviceDisconnected(
+      deviceID,
+      (error, device) => {
+        if (error) {
+          console.log("Disconnected with error:", error);
+        }
+        setConnectionStatus("Disconnected");
+        console.log("Disconnected device");
+        setStepCount(0); // Reset the step count
+        if (deviceRef.current) {
+          setConnectionStatus("Reconnecting...");
+          connectToDevice(deviceRef.current)
+            .then(() => setConnectionStatus("Connected"))
+            .catch((error) => {
+              console.log("Reconnection failed: ", error);
+              setConnectionStatus("Reconnection failed");
+            });
+        }
+      }
     );
-  }
+    return () => subscription.remove();
+  }, [deviceID]);
   return (
     <BLEContext.Provider
       value={{
-        scanDevices,
-        connectDevice,
-        isConnected,
-        isSearching,
-        scannedDevices,
-        sendData,
+        connectionStatus,
+        long,
+        lat,
       }}
     >
       {children}
