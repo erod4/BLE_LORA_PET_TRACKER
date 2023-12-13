@@ -11,6 +11,7 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { BLEContext } from "../../BluetoothComonents/BLEContextProvider";
 import { SettingContext } from "./SettingContext";
+import { LocationContext } from "../../Location/LocationProvider";
 const ConnectedPanel = ({ name, isContentsShown }) => {
   const { sendData } = useContext(BLEContext);
   const {
@@ -21,7 +22,7 @@ const ConnectedPanel = ({ name, isContentsShown }) => {
     isLightOn,
     playingSound,
   } = useContext(SettingContext);
-
+  const { address } = useContext(LocationContext);
   // useEffect(() => {
   //   sendData(`Light: ${isLightOn} `);
   // }, [isLightOn]);
@@ -36,7 +37,11 @@ const ConnectedPanel = ({ name, isContentsShown }) => {
       </View>
       {isContentsShown && (
         <>
-          <Text style={styles.address}>4592 39th St, San Diego, CA 92116</Text>
+          {address ? (
+            <Text style={styles.address}>{address}</Text>
+          ) : (
+            <Text style={styles.address}>GPS Data Not Available.</Text>
+          )}
           <View style={styles.doubleContainer}>
             <SingleSetting
               icon={faLightbulb}

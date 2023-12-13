@@ -10,8 +10,8 @@ const SettingsIcon = () => {
     <TouchableOpacity
       style={{
         position: "absolute",
-        top: 70,
-        right: 20,
+        top: 60,
+        left: 20,
         zIndex: 2,
         backgroundColor: "rgba(45, 45, 45, 0.975)",
         width: 35,

@@ -14,8 +14,8 @@ const Home = () => {
   return (
     <View style={styles.container}>
       <SettingsIcon />
-
-      {connectionStatus === "Connected" ? <Map /> : <Searching />}
+      <Map />
+      {/* {connectionStatus === "Connected" ? <Map /> : <Searching />} */}
       <BottomPanel />
     </View>
   );

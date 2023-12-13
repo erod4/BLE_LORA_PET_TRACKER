@@ -9,7 +9,7 @@ const RegisterScreen = () => {
     container: {
       display: "flex",
       height: "100%",
-      backgroundColor: "#192734",
+      backgroundColor: "rgba(25, 25, 25, 1)",
 
       width: "100%",
       alignItems: "center",

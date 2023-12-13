@@ -21,6 +21,8 @@ const TrainerCallout = ({ name }) => {
 };
 const styles = StyleSheet.create({
   callout: {
+    position: "relative",
+    top: 110,
     flexDirection: "column",
     justifyContent: "center",
     alignItems: "center",

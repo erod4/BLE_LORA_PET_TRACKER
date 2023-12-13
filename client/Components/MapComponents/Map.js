@@ -3,43 +3,24 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import MapView, { Marker, Callout } from "react-native-maps";
 import PetMarker from "../MarkerComponent/PetMarker";
 import PetCallout from "../MarkerComponent/PetCallout";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { faCog } from "@fortawesome/free-solid-svg-icons";
 import ReCenter from "./ReCenter";
 import { BLEContext } from "../BluetoothComonents/BLEContextProvider";
-import Geolocation from "@react-native-community/geolocation";
 import TrainerMarker from "../MarkerComponent/TrainerMarker";
 import TrainerCallout from "../MarkerComponent/TrainerCallout";
-
+import { LocationContext } from "../Location/LocationProvider";
+import UserLoc from "../MarkerComponent/UserLoc";
 const Map = () => {
   const { lat, long } = useContext(BLEContext);
-  const [userLocation, setUserLocation] = useState({
-    latitude: 0,
-    longitude: 0,
-  });
+  const { userLocation, heading, reverseGeoCode } = useContext(LocationContext);
 
   useEffect(() => {
-    // Use watchPosition to continuously track the user's location
-    const watchId = Geolocation.watchPosition(
-      (position) => {
-        const { latitude, longitude } = position.coords;
-        setUserLocation({ latitude, longitude });
-      },
-      (error) => {
-        console.error("Error getting location:", error);
-      },
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 10000 }
-    );
-
-    // Clean up the watchPosition when the component unmounts
-    return () => Geolocation.clearWatch(watchId);
-  }, []);
-  useEffect(() => {
-    console.log(long);
-  }, [long]);
+    if (lat != 0 && long != 0) {
+      reverseGeoCode(lat, long);
+    }
+  }, [lat, long]);
   const initialRegion = {
-    latitude: lat != 0 ? lat : userLocation.latitude,
-    longitude: long != 0 ? long : userLocation.longitude,
+    latitude: userLocation?.latitude,
+    longitude: userLocation?.longitude,
     latitudeDelta: 0.015,
     longitudeDelta: 0.0121,
   };
@@ -51,12 +32,15 @@ const Map = () => {
   };
   return (
     <>
+      <UserLoc userLocation={userLocation} />
       <MapView
         ref={mapRef}
         userInterfaceStyle={"dark"}
         style={styles.map}
         region={initialRegion}
         showsUserLocation={false}
+        showsCompass={true}
+        showsIndoors={true}
       >
         <Marker coordinate={{ latitude: lat, longitude: long }}>
           <PetMarker />
@@ -65,12 +49,13 @@ const Map = () => {
           </Callout>
         </Marker>
         <Marker
+          anchor={{ x: 0.5, y: 0.5 }}
           coordinate={{
-            latitude: userLocation.latitude,
-            longitude: userLocation.longitude,
+            latitude: userLocation?.latitude,
+            longitude: userLocation?.longitude,
           }}
         >
-          <TrainerMarker />
+          <TrainerMarker rotation={heading} />
           <Callout tooltip style={{}}>
             <TrainerCallout name={"Enrique"} />
           </Callout>

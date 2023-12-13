@@ -5,7 +5,7 @@ const Login = () => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      backgroundColor: "#192734",
+      backgroundColor: "rgba(25, 25, 25, 1)",
       alignItems: "center",
       justifyContent: "center",
       height: "100%",

@@ -76,7 +76,7 @@ export const BLEContextProvider = ({ children }) => {
           }
           const rawStepData = atob(char.value);
 
-          // console.log(rawStepData != "0 0");
+          // console.log("Incoming: ", rawStepData);
 
           if (scnd && firstPartOfLong + rawStepData.split(",")[0] != long) {
             // console.log("long: ", firstPartOfLong + rawStepData.split(",")[0]);
