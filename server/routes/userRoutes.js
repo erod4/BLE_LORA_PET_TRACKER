@@ -8,6 +8,7 @@ const {
   updateUser,
   deleteUser,
 } = require("../controllers/userController");
+const isLoggedIn = require("../middleware/isLoggedIn");
 
 const userRoute = express.Router();
 
@@ -19,10 +20,10 @@ userRoute.post("/reset", resetController);
 
 userRoute.post("/verify-reset", verifyResetController);
 
-userRoute.get("/", getUser);
+userRoute.get("/profile", isLoggedIn, getUser);
 
-userRoute.put("/", updateUser);
+userRoute.put("/", isLoggedIn, updateUser);
 
-userRoute.delete("/", deleteUser);
+userRoute.delete("/", isLoggedIn, deleteUser);
 
 module.exports = userRoute;

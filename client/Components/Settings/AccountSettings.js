@@ -73,20 +73,9 @@ const AccountSettings = () => {
                   <Text style={styles.dataFieldText}>Enrique Rodriguez</Text>
                 )}
               </View>
+
               <View style={styles.dataFieldContainer}>
-                <Text style={styles.dataFieldTitle}>UserName</Text>
-                {isEditProfileMode ? (
-                  <TextInput
-                    style={styles.dataFieldInput}
-                    placeholder="erod164"
-                    placeholderTextColor={"#888"}
-                  />
-                ) : (
-                  <Text style={styles.dataFieldText}>erod164</Text>
-                )}
-              </View>
-              <View style={styles.dataFieldContainer}>
-                <Text style={styles.dataFieldTitle}>Email</Text>
+                <Text style={styles.dataFieldTitle}>Phone</Text>
                 {isEditProfileMode ? (
                   <TextInput
                     style={styles.dataFieldInput}
@@ -94,7 +83,7 @@ const AccountSettings = () => {
                     placeholderTextColor={"#888"}
                   />
                 ) : (
-                  <Text style={styles.dataFieldText}>erod71@outlook.com</Text>
+                  <Text style={styles.dataFieldText}>619-408-5577</Text>
                 )}
               </View>
             </View>

@@ -1,10 +1,20 @@
 import { View, Text, StyleSheet, Pressable } from "react-native";
-import React from "react";
-import { TouchableOpacity } from "react-native-gesture-handler";
+import React, { useContext } from "react";
+import { Linking } from "react-native";
 import SettingIcon from "./SettingIcon";
+import { BLEContext } from "../../BluetoothComonents/BLEContextProvider";
+import { LocationContext } from "../../Location/LocationProvider";
 const DoubleSetting = ({ name, onPress, icon, iconBGColor, description }) => {
+  const { long, lat } = useContext(BLEContext);
+  const { userLocation } = useContext(LocationContext);
+  const handlePress = () => {
+    if (lat && long) {
+      const url = `http://maps.apple.com/?saddr=${userLocation.latitude},${userLocation.longitude}&daddr=${lat},${long}&dirflg=d`;
+      Linking.openURL(url);
+    }
+  };
   return (
-    <Pressable style={styles.touchable}>
+    <Pressable style={styles.touchable} onPress={handlePress}>
       <View style={styles.container}>
         <SettingIcon icon={icon} bgColor={iconBGColor} rotate={true} />
 

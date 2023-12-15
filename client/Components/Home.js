@@ -11,11 +11,11 @@ import ReCenter from "./MapComponents/ReCenter";
 
 const Home = () => {
   const { connectionStatus } = useContext(BLEContext);
+
   return (
     <View style={styles.container}>
       <SettingsIcon />
-      <Map />
-      {/* {connectionStatus === "Connected" ? <Map /> : <Searching />} */}
+      {connectionStatus === "Connected" ? <Map /> : <Searching />}
       <BottomPanel />
     </View>
   );

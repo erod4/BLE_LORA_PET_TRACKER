@@ -29,7 +29,6 @@ export const LocationContextProvider = ({ children }) => {
     const watchId = Geolocation.watchPosition(
       (position) => {
         const { latitude, longitude, heading } = position.coords;
-        console.log(latitude, " ", longitude);
         position.coords;
         setUserLocation({ latitude, longitude });
       },
@@ -44,7 +43,6 @@ export const LocationContextProvider = ({ children }) => {
   }, []);
 
   const reverseGeoCode = async (latitude, longitude) => {
-    console.log(latitude);
     const apiKey = "";
 
     const url = `https://revgeocode.search.hereapi.com/v1/revgeocode?apikey=${apiKey}&at=${latitude},${longitude}&lang=en-US`;
