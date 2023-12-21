@@ -1,17 +1,29 @@
 import { View, Text, SafeAreaView, StyleSheet } from "react-native";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import Accordion from "react-native-collapsible/Accordion";
 import { TextInput, TouchableOpacity } from "react-native-gesture-handler";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { useNavigation } from "@react-navigation/native";
+
 import {
   faChevronDown,
   faChevronRight,
 } from "@fortawesome/free-solid-svg-icons";
+import { authContext } from "../Login/UserContextProvider";
 
 const AccountSettings = () => {
+  const { userAuth, updateUserAction } = useContext(authContext);
+  const navigation = useNavigation();
+
   const [active, setActive] = useState("");
   const [isEditProfileMode, setIsEditProfileMode] = useState(false);
   const [isEditPasswordMode, setIsEditPasswordMode] = useState(false);
+  const [formData, setFormData] = useState({
+    name: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
+  });
   const handlePress = (index) => {
     setActive(index);
     if (index == 1) {
@@ -31,6 +43,44 @@ const AccountSettings = () => {
     setIsEditPasswordMode(true);
   };
   const handlePasswordCancelPress = () => {
+    setIsEditPasswordMode(false);
+  };
+  const formatPhoneNumber = (phoneNumberString) => {
+    let cleaned = ("" + phoneNumberString).replace(/\D/g, "");
+    let match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+
+    if (match) {
+      return `(${match[1]}) ${match[2]}-${match[3]}`;
+    }
+    return phoneNumberString;
+  };
+  const handleInputChange = (field, value) => {
+    if (field === "phone") {
+      const formattedValue = formatPhoneNumber(value);
+      setFormData({
+        ...formData,
+        [field]: formattedValue,
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [field]: value,
+      });
+    }
+  };
+
+  const handleSubmit = () => {
+    if (formData.password != formData.confirmPassword) {
+      alert("Passwords do not match");
+      return;
+    }
+    if (formData.phone.length > 0 && formData.phone.length < 10) {
+      alert("Invalid Phone Number");
+      return;
+    }
+    // Perform form submission
+    const submit = updateUserAction(formData);
+    setIsEditProfileMode(false);
     setIsEditPasswordMode(false);
   };
   const header = (content, index, isActive, sections) => {
@@ -66,11 +116,18 @@ const AccountSettings = () => {
                 {isEditProfileMode ? (
                   <TextInput
                     style={styles.dataFieldInput}
-                    placeholder="Enrique Rodriguez"
+                    placeholder={userAuth?.firstName + " " + userAuth?.lastName}
                     placeholderTextColor={"#888"}
+                    keyboardAppearance="dark"
+                    value={formData.name}
+                    onChangeText={(text) => {
+                      handleInputChange("name", text);
+                    }}
                   />
                 ) : (
-                  <Text style={styles.dataFieldText}>Enrique Rodriguez</Text>
+                  <Text style={styles.dataFieldText}>
+                    {userAuth?.firstName + " " + userAuth?.lastName}
+                  </Text>
                 )}
               </View>
 
@@ -79,17 +136,25 @@ const AccountSettings = () => {
                 {isEditProfileMode ? (
                   <TextInput
                     style={styles.dataFieldInput}
-                    placeholder="erod71@outlook.com"
+                    placeholder={userAuth?.phone}
                     placeholderTextColor={"#888"}
+                    keyboardAppearance="dark"
+                    value={formData.phone}
+                    onChangeText={(text) => {
+                      handleInputChange("phone", text);
+                    }}
                   />
                 ) : (
-                  <Text style={styles.dataFieldText}>619-408-5577</Text>
+                  <Text style={styles.dataFieldText}>{userAuth?.phone}</Text>
                 )}
               </View>
             </View>
             {isEditProfileMode && (
               <View style={styles.buttonContainer}>
-                <TouchableOpacity style={styles.touchableOpacity}>
+                <TouchableOpacity
+                  style={styles.touchableOpacity}
+                  onPress={handleSubmit}
+                >
                   <Text style={styles.saveButtonText}>Save</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -123,6 +188,11 @@ const AccountSettings = () => {
                     style={styles.dataFieldInput}
                     placeholder="••••••••"
                     placeholderTextColor={"#888"}
+                    keyboardAppearance="dark"
+                    value={formData.password}
+                    onChangeText={(text) => {
+                      handleInputChange("password", text);
+                    }}
                   />
                 ) : (
                   <Text style={styles.dataFieldText}>••••••••</Text>
@@ -138,6 +208,11 @@ const AccountSettings = () => {
                       style={styles.dataFieldInput}
                       placeholder="••••••••"
                       placeholderTextColor={"#888"}
+                      keyboardAppearance="dark"
+                      value={formData.confirmPassword}
+                      onChangeText={(text) => {
+                        handleInputChange("confirmPassword", text);
+                      }}
                     />
                   ) : (
                     <Text style={styles.dataFieldText}>••••••••</Text>
@@ -147,7 +222,10 @@ const AccountSettings = () => {
             </View>
             {isEditPasswordMode && (
               <View style={styles.buttonContainer}>
-                <TouchableOpacity style={styles.touchableOpacity}>
+                <TouchableOpacity
+                  style={styles.touchableOpacity}
+                  onPress={handleSubmit}
+                >
                   <Text style={styles.saveButtonText}>Save</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
@@ -218,7 +296,7 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   editProfileHeaderEditButtonText: {
-    color: "#0077b6",
+    color: "#0466c8",
     fontWeight: "700",
     fontSize: 15,
   },
@@ -262,12 +340,12 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
   },
   saveButtonText: {
-    color: "#0077b6",
+    color: "#0466c8",
     fontWeight: "900",
   },
   cancelButtonText: {
     fontWeight: "900",
-    color: "#888",
+    color: "#777",
   },
   touchableOpacity: {
     paddingBottom: 10,

@@ -4,28 +4,22 @@ import Searchresult from "./Searchresult";
 import { BLEContext } from "../../BluetoothComonents/BLEContextProvider";
 
 const DisconnectedPanel = () => {
-  const { isSearching, scannedDevices } = useContext(BLEContext);
+  const { availableDevices } = useContext(BLEContext);
 
   return (
     <ScrollView style={styles.container}>
-      <Text style={styles.title}>
-        {isSearching ? "Search Results" : "Begin Scanning For Devices"}
-      </Text>
+      <Text style={styles.title}>Search Results</Text>
 
-      {scannedDevices && (
-        <Searchresult
-          name={scannedDevices?.name}
-          key={scannedDevices?.id}
-          device={scannedDevices}
-        />
-      )}
+      {availableDevices?.map((device, index) => {
+        return <Searchresult name={device?.name} key={index} device={device} />;
+      })}
     </ScrollView>
   );
 };
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    gap: 10,
+    gap: 20,
   },
   title: {
     width: "100%",

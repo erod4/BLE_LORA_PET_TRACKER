@@ -10,6 +10,7 @@ const FormInput = ({
   placeholder,
   secureTextEntry,
   icon,
+  keyboardType,
 }) => {
   const [active, setActive] = useState(false);
   const styles = StyleSheet.create({
@@ -51,6 +52,7 @@ const FormInput = ({
       <View style={styles.inputView}>
         <FontAwesomeIcon icon={icon} color={"#ddd"} />
         <TextInput
+          keyboardType={keyboardType}
           secureTextEntry={secureTextEntry}
           keyboardAppearance="dark"
           placeholder={placeholder}

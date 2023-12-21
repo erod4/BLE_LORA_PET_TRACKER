@@ -17,8 +17,8 @@ const registerController = async (req, res, next) => {
     }
     // hash password
 
-    const salt = bcrypt.genSalt(10);
-    const hasedPassword = bcrypt.hash(password, salt);
+    const salt = await bcrypt.genSalt(10);
+    const hasedPassword = await bcrypt.hash(password, salt);
 
     //create user
 
@@ -40,9 +40,10 @@ const registerController = async (req, res, next) => {
 
 const loginController = async (req, res, next) => {
   const { phone, password } = req.body;
+
   try {
     const userFound = await User.findOne({ phone });
-
+    console.log(userFound);
     if (!userFound) {
       return next(new AppErr("Invalid Login Credentials", 400));
     }
@@ -58,6 +59,10 @@ const loginController = async (req, res, next) => {
         ? userFound.name.split(" ")[0]
         : userFound.name,
       id: userFound.id,
+      lastName: userFound.name.split(" ")[1]
+        ? userFound.name.split(" ")[1]
+        : " ",
+      phone: userFound.phone,
       token: generateToken(userFound.id),
     });
   } catch (error) {
@@ -116,12 +121,28 @@ const getUser = async (req, res, next) => {
 };
 
 const updateUser = async (req, res, next) => {
-  const { id } = req.params; // assuming the user's ID is passed in the URL
-  const updateFields = req.body;
-
+  const id = req.user; // assuming the user's ID is passed in the URL
+  const { name, phone, password } = req.body;
   try {
-    // Validate updateFields if necessary
+    // Create an object to hold the fields to update
+    let updateFields = {};
 
+    // Add fields to the updateFields object only if they are provided and not empty
+    if (name && name.length > 0) updateFields.name = name;
+    if (phone && phone.length > 0) updateFields.phone = phone;
+    if (password && password.length > 0) {
+      // hash the new password before updating
+      const salt = await bcrypt.genSalt(10);
+      updateFields.password = await bcrypt.hash(password, salt);
+    }
+    // Check if updateFields is empty
+    if (Object.keys(updateFields).length === 0) {
+      return res.status(400).json({
+        status: "Error",
+        message: "No valid fields provided to update",
+      });
+    }
+    // Update the user with the provided fields
     const updatedUser = await User.findByIdAndUpdate(id, updateFields, {
       new: true, // Return the modified document rather than the original
       runValidators: true, // Ensure updated fields are validated
@@ -130,14 +151,17 @@ const updateUser = async (req, res, next) => {
     if (!updatedUser) {
       return next(new AppErr("User not found.", 404));
     }
-
     res.json({
       status: "Success",
-      firstName: updatedUser.name.split(" ")[0]
-        ? updatedUser.name.split(" ")[0]
-        : updatedUser.name,
-      id: updatedUser.id,
-      token: generateToken(updatedUser.id),
+      firstName: userFound.name.split(" ")[0]
+        ? userFound.name.split(" ")[0]
+        : userFound.name,
+      id: userFound.id,
+      lastName: userFound.name.split(" ")[1]
+        ? userFound.name.split(" ")[1]
+        : " ",
+      phone: userFound.phone,
+      token: generateToken(userFound.id),
     });
   } catch (error) {
     return next(new AppErr(error.message, 500));
@@ -145,17 +169,16 @@ const updateUser = async (req, res, next) => {
 };
 
 const deleteUser = async (req, res, next) => {
-  const { id } = req.body;
-
   try {
-    const isDeleted = await User.findByIdAndDelete({ id });
-
+    const isDeleted = await User.findByIdAndDelete(req.user);
     if (isDeleted) {
       res.json({ status: "Success" });
     } else {
       return next(new AppErr("An error occured, please try again later.", 400));
     }
-  } catch (error) {}
+  } catch (error) {
+    next(new AppErr(error.message, 500));
+  }
 };
 module.exports = {
   registerController,

@@ -7,22 +7,27 @@ import ReCenter from "./ReCenter";
 import { BLEContext } from "../BluetoothComonents/BLEContextProvider";
 import TrainerMarker from "../MarkerComponent/TrainerMarker";
 import TrainerCallout from "../MarkerComponent/TrainerCallout";
+
 import { LocationContext } from "../Location/LocationProvider";
 import UserLoc from "../MarkerComponent/UserLoc";
+import BottomPanel from "../BottomSheet/BottomPanel";
+import { authContext } from "../Login/UserContextProvider";
+import DisconnectBle from "./DisconnectBle";
 const Map = () => {
   const { lat, long } = useContext(BLEContext);
   const { userLocation, heading, reverseGeoCode } = useContext(LocationContext);
-
+  const { userAuth } = useContext(authContext);
   useEffect(() => {
     if (lat != 0 && long != 0) {
+      console.log(lat, long);
       reverseGeoCode(lat, long);
     }
   }, [lat, long]);
   const initialRegion = {
     latitude: userLocation?.latitude,
     longitude: userLocation?.longitude,
-    latitudeDelta: 0.015,
-    longitudeDelta: 0.0121,
+    latitudeDelta: 0.025,
+    longitudeDelta: 0.0171,
   };
 
   const mapRef = useRef(null);
@@ -32,7 +37,6 @@ const Map = () => {
   };
   return (
     <>
-      <UserLoc userLocation={userLocation} />
       <MapView
         ref={mapRef}
         userInterfaceStyle={"dark"}
@@ -57,12 +61,13 @@ const Map = () => {
         >
           <TrainerMarker rotation={heading} />
           <Callout tooltip style={{}}>
-            <TrainerCallout name={"Enrique"} />
+            <TrainerCallout name={userAuth?.firstName} />
           </Callout>
         </Marker>
         <View></View>
       </MapView>
       <ReCenter handleRecenter={handleRecenter} />
+      <DisconnectBle />
     </>
   );
 };

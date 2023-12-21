@@ -1,13 +1,12 @@
-import { View, Text, Image } from "react-native";
+import { View, Text, Image, TouchableOpacity } from "react-native";
 import React, { useContext, useEffect, useRef } from "react";
 import LottieView from "lottie-react-native";
-import { TouchableOpacity } from "react-native-gesture-handler";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { faBluetoothB } from "@fortawesome/free-brands-svg-icons";
 import { BLEContext } from "../BLEContextProvider";
 
 const Searching = () => {
-  const { connectionStatus } = useContext(BLEContext);
+  const { connectionStatus, scanDevices } = useContext(BLEContext);
 
   const animationRef = useRef(null);
   useEffect(() => {
@@ -26,7 +25,7 @@ const Searching = () => {
         paddingTop: 120,
       }}
     >
-      <View
+      <TouchableOpacity
         style={{
           backgroundColor: "#0466c8",
           paddingHorizontal: 80,
@@ -34,11 +33,12 @@ const Searching = () => {
           borderRadius: 10,
           marginBottom: 40,
         }}
+        onPress={scanDevices}
       >
         <Text style={{ fontWeight: "700", color: "#fff", fontSize: 15 }}>
-          {connectionStatus}
+          Search
         </Text>
-      </View>
+      </TouchableOpacity>
       <LottieView
         style={{
           height: 400,

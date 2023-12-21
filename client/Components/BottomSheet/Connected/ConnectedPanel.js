@@ -13,7 +13,7 @@ import { BLEContext } from "../../BluetoothComonents/BLEContextProvider";
 import { SettingContext } from "./SettingContext";
 import { LocationContext } from "../../Location/LocationProvider";
 const ConnectedPanel = ({ name, isContentsShown }) => {
-  const { sendData } = useContext(BLEContext);
+  const { writeToCharacteristic } = useContext(BLEContext);
   const {
     toggleLight,
     playSound,
@@ -23,12 +23,12 @@ const ConnectedPanel = ({ name, isContentsShown }) => {
     playingSound,
   } = useContext(SettingContext);
   const { address } = useContext(LocationContext);
-  // useEffect(() => {
-  //   sendData(`Light: ${isLightOn} `);
-  // }, [isLightOn]);
-  // useEffect(() => {
-  //   sendData(`Sound: ${playingSound} `);
-  // }, [playingSound]);
+  useEffect(() => {
+    writeToCharacteristic(`L: ${isLightOn}`);
+  }, [isLightOn]);
+  useEffect(() => {
+    writeToCharacteristic(`S: ${playingSound}`);
+  }, [playingSound]);
   return (
     <View style={styles.header}>
       <View style={styles.nameContainer}>

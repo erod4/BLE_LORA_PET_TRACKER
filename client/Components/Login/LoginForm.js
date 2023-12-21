@@ -1,32 +1,59 @@
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { useNavigation } from "@react-navigation/native";
-import { faLock, faEnvelope } from "@fortawesome/free-solid-svg-icons";
+import { faLock, faEnvelope, faPhone } from "@fortawesome/free-solid-svg-icons";
 import FormInput from "../Register/FormInput";
 import FormButton from "../Register/FormButton";
+import { authContext } from "./UserContextProvider";
 
 const LoginForm = () => {
+  const { loginUserAction } = useContext(authContext);
   const [formData, setFormData] = useState({
-    email: "",
+    phone: "",
     password: "",
   });
-  const handleInputChange = (field, value) => {
-    setFormData({
-      ...formData,
-      [field]: value,
-    });
+  const navigation = useNavigation();
+
+  const formatPhoneNumber = (phoneNumberString) => {
+    let cleaned = ("" + phoneNumberString).replace(/\D/g, "");
+    let match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
+
+    if (match) {
+      return `(${match[1]}) ${match[2]}-${match[3]}`;
+    }
+    return phoneNumberString;
   };
 
-  const handleSubmit = () => {
-    if (formData.email === "" || formData.password === "") {
+  const handleInputChange = (field, value) => {
+    if (field === "phone") {
+      const formattedValue = formatPhoneNumber(value);
+      setFormData({
+        ...formData,
+        [field]: formattedValue,
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [field]: value,
+      });
+    }
+  };
+  const handleSubmit = async () => {
+    if (formData.phone === "" || formData.password === "") {
       // Show an error message or prevent form submission
       alert("Please fill in all required fields.");
     } else {
       // Perform form submission
-      // ...
+      const submit = await loginUserAction(formData);
+      if (submit) {
+        navigation.navigate("home");
+        setFormData({
+          phone: "",
+          password: "",
+        });
+      }
     }
   };
-  const navigation = useNavigation();
   const toSignUp = () => {
     navigation.navigate("register");
   };
@@ -50,15 +77,18 @@ const LoginForm = () => {
   return (
     <View style={styles.container}>
       <FormInput
-        icon={faEnvelope}
-        label={"Email"}
-        placeholder={"Email"}
+        icon={faPhone}
+        label={"Phone"}
+        value={formData.phone}
+        keyboardType={"phone-pad"}
+        placeholder={"Phone"}
         onChangeText={(text) => {
-          handleInputChange("email", text);
+          handleInputChange("phone", text);
         }}
       />
       <FormInput
         icon={faLock}
+        value={formData.password}
         label={"Password"}
         placeholder={"Password"}
         secureTextEntry={true}
@@ -72,6 +102,15 @@ const LoginForm = () => {
         <Text style={{ color: "#aaa" }}>Don't have an account? </Text>
         <TouchableOpacity onPress={toSignUp}>
           <Text style={{ color: "#0466c8" }}>Sign Up</Text>
+        </TouchableOpacity>
+      </View>
+      <View style={styles.text}>
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate("reset");
+          }}
+        >
+          <Text style={{ color: "#0466c8" }}>Reset Password</Text>
         </TouchableOpacity>
       </View>
     </View>

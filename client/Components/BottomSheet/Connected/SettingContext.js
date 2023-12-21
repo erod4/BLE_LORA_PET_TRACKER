@@ -35,7 +35,8 @@ const reducer = (state, action) => {
 };
 export const SettingContextProvider = ({ children }) => {
   const [state, dispatch] = useReducer(reducer, INITIAL_STATE);
-  const { sendData } = useContext(BLEContext);
+  const { writeToCharacteristic } = useContext(BLEContext);
+
   const toggleLight = () => {
     dispatch({
       type: "TOGGLE_LIGHT",

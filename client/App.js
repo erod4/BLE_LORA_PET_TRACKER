@@ -17,48 +17,75 @@ import Login from "./Components/Login/Login";
 import SettingsPage from "./Components/Settings/SettingsPage";
 import RegisterScreen from "./Components/Register/RegisterScreen";
 import { LocationContextProvider } from "./Components/Location/LocationProvider";
+import AuthContextProvider from "./Components/Login/UserContextProvider";
+import ResetScreen from "./Components/Reset/ResetScreen";
+import VerifyResetScreen from "./Components/Reset/VerifyResetScreen";
 
 export default function App() {
   const Stack = createNativeStackNavigator();
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <LocationContextProvider>
-        <BLEContextProvider>
-          <SettingContextProvider>
-            <NavigationContainer>
-              <Stack.Navigator initialRouteName="home">
-                <Stack.Screen
-                  name="login"
-                  component={Login}
-                  options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                  name="home"
-                  component={Home}
-                  options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                  name="register"
-                  component={RegisterScreen}
-                  options={{ headerShown: false }}
-                />
-                <Stack.Screen
-                  name="settings"
-                  component={SettingsPage}
-                  options={{
-                    title: "Settings",
-                    headerShown: true,
-                    headerStyle: { backgroundColor: "rgba(25, 25, 25, 1)" },
-                    headerTitleStyle: { color: "#fff" },
-                    headerTintColor: "#fff",
-                  }}
-                />
-              </Stack.Navigator>
-            </NavigationContainer>
-          </SettingContextProvider>
-        </BLEContextProvider>
-      </LocationContextProvider>
+      <AuthContextProvider>
+        <LocationContextProvider>
+          <BLEContextProvider>
+            <SettingContextProvider>
+              <NavigationContainer>
+                <Stack.Navigator initialRouteName="login">
+                  <Stack.Screen
+                    name="login"
+                    component={Login}
+                    options={{ headerShown: false }}
+                  />
+                  <Stack.Screen
+                    name="home"
+                    component={Home}
+                    options={{ headerShown: false }}
+                  />
+                  <Stack.Screen
+                    name="register"
+                    component={RegisterScreen}
+                    options={{ headerShown: false }}
+                  />
+                  <Stack.Screen
+                    name="settings"
+                    component={SettingsPage}
+                    options={{
+                      title: "Settings",
+                      headerShown: true,
+                      headerStyle: { backgroundColor: "rgba(25, 25, 25, 1)" },
+                      headerTitleStyle: { color: "#fff" },
+                      headerTintColor: "#fff",
+                    }}
+                  />
+                  <Stack.Screen
+                    name="reset"
+                    component={ResetScreen}
+                    options={{
+                      title: "",
+                      headerShown: true,
+                      headerStyle: { backgroundColor: "rgba(25, 25, 25, 1)" },
+                      headerTitleStyle: { color: "#fff" },
+                      headerTintColor: "#fff",
+                    }}
+                  />
+                  <Stack.Screen
+                    name="verify"
+                    component={VerifyResetScreen}
+                    options={{
+                      title: "",
+                      headerShown: true,
+                      headerStyle: { backgroundColor: "rgba(25, 25, 25, 1)" },
+                      headerTitleStyle: { color: "#fff" },
+                      headerTintColor: "#fff",
+                    }}
+                  />
+                </Stack.Navigator>
+              </NavigationContainer>
+            </SettingContextProvider>
+          </BLEContextProvider>
+        </LocationContextProvider>
+      </AuthContextProvider>
     </GestureHandlerRootView>
   );
 }

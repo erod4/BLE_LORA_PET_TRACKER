@@ -3,12 +3,19 @@ import React, { useContext, useState } from "react";
 import FormInput from "./FormInput";
 import { useNavigation } from "@react-navigation/native";
 import FormButton from "./FormButton";
-import { faEnvelope, faLock, faUser } from "@fortawesome/free-solid-svg-icons";
+import {
+  faEnvelope,
+  faLock,
+  faPhone,
+  faUser,
+} from "@fortawesome/free-solid-svg-icons";
+import { authContext } from "../Login/UserContextProvider";
 
 const RegisterForm = () => {
+  const { registerUserAction } = useContext(authContext);
   const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
+    name: "",
+    phone: "",
     password: "",
     confirmPassword: "",
   });
@@ -17,28 +24,53 @@ const RegisterForm = () => {
   const toLogin = () => {
     navigation.navigate("login");
   };
+  const formatPhoneNumber = (phoneNumberString) => {
+    let cleaned = ("" + phoneNumberString).replace(/\D/g, "");
+    let match = cleaned.match(/^(\d{3})(\d{3})(\d{4})$/);
 
+    if (match) {
+      return `(${match[1]}) ${match[2]}-${match[3]}`;
+    }
+    return phoneNumberString;
+  };
   const handleInputChange = (field, value) => {
-    setFormData({
-      ...formData,
-      [field]: value,
-    });
+    if (field === "phone") {
+      const formattedValue = formatPhoneNumber(value);
+      setFormData({
+        ...formData,
+        [field]: formattedValue,
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [field]: value,
+      });
+    }
   };
 
   const handleSubmit = () => {
     if (
-      formData.fullName === "" ||
-      formData.email === "" ||
+      formData.name === "" ||
+      formData.phone === "" ||
       formData.password === "" ||
       formData.confirmPassword === ""
     ) {
       // Show an error message or prevent form submission
       alert("Please fill in all required fields.");
-    } else if (formData.password != formData.confirmPassword) {
+      return;
+    }
+    if (formData.password != formData.confirmPassword) {
       alert("Passwords do not match");
-    } else {
-      // Perform form submission
-      // ...
+      return;
+    }
+    if (formData.phone.length < 10) {
+      alert("Invalid Phone Number");
+      return;
+    }
+    // Perform form submission
+    const submit = registerUserAction(formData);
+    if (submit) {
+      navigation.navigate("home");
     }
   };
   return (
@@ -48,15 +80,17 @@ const RegisterForm = () => {
         icon={faUser}
         placeholder={"Full Name"}
         onChangeText={(text) => {
-          handleInputChange("fullName", text);
+          handleInputChange("name", text);
         }}
       />
       <FormInput
-        label={"Email"}
-        icon={faEnvelope}
-        placeholder={"Email"}
+        label={"Phone"}
+        icon={faPhone}
+        value={formData.phone}
+        keyboardType={"phone-pad"}
+        placeholder={"Phone"}
         onChangeText={(text) => {
-          handleInputChange("email", text);
+          handleInputChange("phone", text);
         }}
       />
       <FormInput

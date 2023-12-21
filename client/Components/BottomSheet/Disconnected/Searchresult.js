@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { BLEContext } from "../../BluetoothComonents/BLEContextProvider";
 
 const Searchresult = ({ name, device }) => {
-  const { connectDevice } = useContext(BLEContext);
+  const { selectAndConnectToDevice } = useContext(BLEContext);
   return (
     <View style={styles.container}>
       <View style={styles.containerLeft}>
@@ -18,7 +18,7 @@ const Searchresult = ({ name, device }) => {
       <TouchableOpacity
         style={styles.connectButton}
         onPress={() => {
-          connectDevice(device);
+          selectAndConnectToDevice(device);
         }}
       >
         <Text style={styles.connectButtonText}>Connect</Text>

@@ -1,66 +1,22 @@
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import React from "react";
 
 const ConfirmAccountDelete = ({ onConfirm, onCancel }) => {
-  return (
-    <View
-      style={[
-        StyleSheet.absoluteFill,
-        { justifyContent: "center", alignItems: "center" },
-      ]}
-    >
-      <View
-        style={{
-          backgroundColor: "rgba(45, 45, 45, 1)",
-          borderWidth: 2,
-          borderColor: "#0466c8",
-          borderRadius: 10,
-          padding: 10,
-          gap: 15,
-        }}
-      >
-        <Text style={{ color: "#fff", fontWeight: "700" }}>
-          Confirm Account Deletion?
-        </Text>
-        <View
-          style={{
-            flexDirection: "row",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: 10,
-          }}
-        >
-          <TouchableOpacity
-            onPress={() => {
-              onConfirm;
-            }}
-            style={{
-              padding: 10,
-              backgroundColor: "#0466c8",
-              borderRadius: 10,
-              width: 80,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ fontWeight: "700", color: "#fff" }}>Confirm</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={onCancel}
-            style={{
-              padding: 10,
-              backgroundColor: "#aaa",
-              borderRadius: 10,
-              width: 80,
-              justifyContent: "center",
-              alignItems: "center",
-            }}
-          >
-            <Text style={{ fontWeight: "700", color: "#fff" }}>cancel</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    </View>
+  Alert.alert(
+    "Confirm Account Deletion",
+    "Are you sure you want to delete your account?",
+    [
+      {
+        text: "Cancel",
+        onPress: onCancel,
+        style: "cancel",
+      },
+      {
+        text: "Delete",
+        onPress: onConfirm,
+      },
+    ],
+    { cancelable: false }
   );
 };
 

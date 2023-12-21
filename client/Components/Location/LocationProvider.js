@@ -3,6 +3,7 @@ import * as Location from "expo-location";
 import Geolocation from "@react-native-community/geolocation";
 import CompassHeading from "react-native-compass-heading";
 import axios from "react-native-axios";
+import { GEO_API_KEY } from "@env";
 
 export const LocationContext = createContext(null);
 
@@ -43,7 +44,7 @@ export const LocationContextProvider = ({ children }) => {
   }, []);
 
   const reverseGeoCode = async (latitude, longitude) => {
-    const apiKey = "";
+    const apiKey = GEO_API_KEY;
 
     const url = `https://revgeocode.search.hereapi.com/v1/revgeocode?apikey=${apiKey}&at=${latitude},${longitude}&lang=en-US`;
 
@@ -53,7 +54,7 @@ export const LocationContextProvider = ({ children }) => {
       const formattedAddress = fullAdress.split("-")[0];
       setAdress(formattedAddress);
     } catch (error) {
-      console.log(error);
+      console.log("reverse geo", error);
     }
   };
 

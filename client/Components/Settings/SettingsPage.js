@@ -1,15 +1,31 @@
 import { View, Text, TouchableOpacity } from "react-native";
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import AccountSettings from "./AccountSettings";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
+import { useNavigation } from "@react-navigation/native";
 import ConfirmAccountDelete from "./ConfirmAccountDelete";
 import ConfirmLogout from "./ConfirmLogout";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { authContext } from "../Login/UserContextProvider";
 
 const SettingsPage = () => {
+  const { deleteUserAction, userAuth } = useContext(authContext);
   const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
   const [isConfirmLogoutOpen, setIsConfirmLogoutOpen] = useState(false);
-  const handleDeletePress = () => {};
-  const handleLogoutPress = () => {};
+  const nav = useNavigation();
+  const handleDeletePress = async () => {
+    const res = await deleteUserAction(userAuth?.id);
+    console.log(res);
+    if (res) {
+      AsyncStorage.removeItem("userAuth");
+
+      nav.navigate("login");
+    }
+  };
+  const handleLogoutPress = async () => {
+    console.log("here");
+    await AsyncStorage.removeItem("userAuth");
+    nav.navigate("login");
+  };
   return (
     <View
       style={{
@@ -30,7 +46,7 @@ const SettingsPage = () => {
             setIsConfirmLogoutOpen(true);
           }}
           style={{
-            backgroundColor: "#000",
+            backgroundColor: "#333",
             marginHorizontal: 20,
             padding: 10,
             borderRadius: 10,

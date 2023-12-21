@@ -14,7 +14,7 @@ const isLoggedIn = (req, res, next) => {
   //save the user into req obj
   ///can possibly get the id for the qr code from the req
   req.user = decodedUser.id;
-  //console.log(req);
+
   next();
 };
 module.exports = isLoggedIn;
